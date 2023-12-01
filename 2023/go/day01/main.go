@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"log"
-	"math"
 	"os"
 	"strings"
 )
@@ -22,7 +21,9 @@ func main() {
 		lines = append(lines, sc.Text())
 	}
 	answer1 := Part1(lines)
+	answer2 := Part2(lines)
 	fmt.Println(answer1)
+	fmt.Println(answer2)
 }
 
 var digits map[string]int = map[string]int{
@@ -68,11 +69,56 @@ func Part1(lines []string) int {
 		first_indices := make([]int, 10)
 		last_indices := make([]int, 10)
 		for key, value := range digits {
-			first_indices[value] = strings.Index(line, key)
-			last_indices[value] = strings.LastIndex(line, key)
-			if first_indices[value]==-1 {
-				first_indices[value] = math.MaxInt32
+			f := strings.Index(line, key)
+			l := strings.LastIndex(line, key)
+			if f==-1 {
+				f = len(line)
 			}
+			first_indices[value] = f
+			last_indices[value] = l
+		}
+		first, last := minIndex(first_indices), maxIndex(last_indices)
+		number := first*10 + last
+		res += number
+	}
+	return res
+}
+
+var spell map[string]int = map[string]int {
+	"zero": 0,
+	"one": 1,
+	"two": 2,
+	"three": 3,
+	"four": 4,
+	"five": 5,
+	"six": 6,
+	"seven": 7,
+	"eight": 8,
+	"nine": 9,
+}
+
+func Part2(lines []string) int {
+	res := 0
+	for _, line := range lines {
+		first_indices := make([]int, 10)
+		last_indices := make([]int, 10)
+		for key, value := range digits {
+			f := strings.Index(line, key)
+			l := strings.LastIndex(line, key)
+			if f==-1 {
+				f = len(line)
+			}
+			first_indices[value] = f
+			last_indices[value] = l
+		}
+		for key, value := range spell {
+			f := strings.Index(line, key)
+			l := strings.LastIndex(line, key)
+			if f==-1 {
+				f = len(line)
+			}
+			first_indices[value] = min(first_indices[value], f)
+			last_indices[value] = max(last_indices[value], l)
 		}
 		first, last := minIndex(first_indices), maxIndex(last_indices)
 		number := first*10 + last
