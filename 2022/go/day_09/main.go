@@ -12,9 +12,8 @@ func check(err error) {
         log.Fatalln(err)
     }
 }
-
 func main() {
-    file, err := os.Open("./day_08/input.txt")
+    file, err := os.Open("./day_09/input.txt")
     check(err)
     defer file.Close()
 
@@ -23,10 +22,10 @@ func main() {
     for sc.Scan() {
         lines = append(lines, sc.Text())
     }
-    grid := parse_input(lines)
-    var result int
-    result = part1(grid)
-    fmt.Println(result)
-	result = part2(grid)
-    fmt.Println(result)
+    moves := parseInput(lines)
+    var res int
+    res = part1(moves)
+    fmt.Println(res)
+    res = part2(moves)
+    fmt.Println(res)
 }
