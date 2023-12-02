@@ -11,6 +11,7 @@ import (
 
 func main() {
 	input_file, err := os.Open("./day02/input.txt")
+	// input_file, err := os.Open("./day02/test.txt")
 	if err!=nil {
 		log.Fatalln(err)
 	}
@@ -23,7 +24,9 @@ func main() {
 		games = append(games, b)
 	}
 	answer1 :=  part1(games)
+	answer2 :=  part2(games)
 	fmt.Println(answer1)
+	fmt.Println(answer2)
 }
 
 var available map[string]int = map[string]int {
@@ -57,6 +60,28 @@ func part1(games [][]string) int {
 		if possible {
 			res += (i+1)
 		}
+	}
+	return res
+}
+
+// part2
+func part2(games [][]string) int {
+	res := 0
+	for _, game := range games {
+		count := make(map[string]int, 0)
+		for _, g := range game {
+			cubes := strings.Split(g, ",")
+			for _, cube := range cubes {
+				color := strings.Split(strings.Trim(cube, " "), " ")
+				freq, _ := strconv.Atoi(color[0])
+				count[color[1]] = max(count[color[1]], freq)
+			}
+		}
+		power := 1
+		for _, c := range count {
+			power *= c
+		}
+		res += power
 	}
 	return res
 }
