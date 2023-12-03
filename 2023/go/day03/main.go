@@ -65,16 +65,13 @@ func part1(lines []string) int {
 			}
 			for _, rr := range []int{i - 1, i, i + 1} {
 				for _, cc := range []int{j - 1, j, j + 1} {
-					if rr == i && cc == j {
+					if rr < 0 || rr >= len(lines) || cc < 0 || cc >= len(line) || !digits[rune(lines[rr][cc])] {
 						continue
 					}
-					if digits[rune(lines[rr][cc])] {
-						l := cc
-						for l >= 0 && digits[rune(lines[rr][l])] {
-							l -= 1
-						}
-						numbers_start[[2]int{rr, l + 1}] = true
+					for cc > 0 && digits[rune(lines[rr][cc-1])] {
+						cc -= 1
 					}
+					numbers_start[[2]int{rr, cc}] = true
 				}
 			}
 		}
@@ -88,45 +85,33 @@ func part1(lines []string) int {
 
 func part2(lines []string) int {
 	res := 0
-	numbers_start := make(map[[2]int]map[[2]int]bool)
 	for i, line := range lines {
 		for j, c := range line {
 			if c != '*' {
 				continue
 			}
+			numbers_start := make(map[[2]int]bool)
 			for _, rr := range []int{i - 1, i, i + 1} {
 				for _, cc := range []int{j - 1, j, j + 1} {
-					if rr == i && cc == j {
+					if rr < 0 || rr >= len(lines) || cc < 0 || cc >= len(line) || !digits[rune(lines[rr][cc])] {
 						continue
 					}
-					if digits[rune(lines[rr][cc])] {
-						l := cc
-						for l >= 0 && digits[rune(lines[rr][l])] {
-							l -= 1
-						}
-						if numbers_start[[2]int{i, j}] == nil {
-							numbers_start[[2]int{i, j}] = make(map[[2]int]bool)
-						}
-						numbers_start[[2]int{i, j}][[2]int{rr, l + 1}] = true
+					for cc > 0 && digits[rune(lines[rr][cc-1])] {
+						cc -= 1
 					}
+					numbers_start[[2]int{rr, cc}] = true
 				}
 			}
-		}
-	}
-	for _, value := range numbers_start {
-		keys := make([][2]int, 0, len(value))
-		for k := range value {
-			keys = append(keys, k)
-		}
-		if len(keys) == 2 {
+			keys := make([][2]int, 0, len(numbers_start))
+			for k := range numbers_start {
+				keys = append(keys, k)
+			}
+			if len(keys) != 2 {
+				continue
+			}
 			product := 1
-			for _, key := range keys {
-				row, col := key[0], key[1]
-				r := col
-				for r < len(lines[row]) && digits[rune(lines[row][r])] {
-					r += 1
-				}
-				num, _ := strconv.Atoi(lines[row][col:r])
+			for key := range numbers_start {
+				num, _ := getNumber(key[0], key[1], lines)
 				product *= num
 			}
 			res += product
