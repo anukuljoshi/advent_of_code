@@ -46,6 +46,19 @@ func convertToIntArray(s []string) []int {
 	return res
 }
 
+func binarySearch(num, target int) int {
+	l, r := 0, int(num/2)
+	for l < r {
+		m := l + int((r-l)/2)
+		if m*(num-m) > target {
+			r = m
+		} else {
+			l = m + 1
+		}
+	}
+	return l
+}
+
 func part1(lines []string) int {
 	res := 1
 	time := convertToIntArray(strings.Split(strings.Split(lines[0], ":")[1], " "))
@@ -53,16 +66,8 @@ func part1(lines []string) int {
 	for i := 0; i < len(time); i++ {
 		t := time[i]
 		d := distance[i]
-		l, r := 0, int(t/2)
-		for l < r {
-			m := l + int((r-l)/2)
-			if m*(t-m) > d {
-				r = m
-			} else {
-				l = m + 1
-			}
-		}
-		ways := (t + 1) - l*2
+		p := binarySearch(t, d)
+		ways := (t + 1) - p*2
 		res *= ways
 	}
 	return res
@@ -83,16 +88,7 @@ func convertToString(s string) string {
 func part2(lines []string) int {
 	t, _ := strconv.Atoi(convertToString(strings.Split(lines[0], ":")[1]))
 	d, _ := strconv.Atoi(convertToString(strings.Split(lines[1], ":")[1]))
-	fmt.Println(t, d)
-	l, r := 0, int(t/2)
-	for l < r {
-		m := l + int((r-l)/2)
-		if m*(t-m) > d {
-			r = m
-		} else {
-			l = m + 1
-		}
-	}
-	ways := (t + 1) - l*2
+	p := binarySearch(t, d)
+	ways := (t + 1) - p*2
 	return ways
 }
