@@ -77,7 +77,7 @@ func part1(lines []string) int {
 	}
 
 	res := 0
-	ranks := make(map[int][]string, 7)
+	ranks := make(map[int][]string)
 	bids := make(map[string]int)
 	for _, line := range lines {
 		hand := strings.Split(line, " ")
@@ -162,7 +162,7 @@ func part2(lines []string) int {
 	}
 
 	res := 0
-	ranks := make(map[int][]string, 7)
+	ranks := make(map[int][]string)
 	bids := make(map[string]int)
 	for _, line := range lines {
 		hand := strings.Split(line, " ")
