@@ -46,7 +46,23 @@ const (
 	HIGH     = 0
 )
 
-func cmpFunc(cardOrder map[rune]int, a, b string) int {
+var cardOrder map[rune]int = map[rune]int{
+	'2': 1,
+	'3': 2,
+	'4': 3,
+	'5': 4,
+	'6': 5,
+	'7': 6,
+	'8': 7,
+	'9': 8,
+	'T': 9,
+	'J': 10,
+	'Q': 11,
+	'K': 12,
+	'A': 13,
+}
+
+func cmpFunc(a, b string) int {
 	n := len(a)
 	for i := 0; i < n; i++ {
 		ca, cb := rune(a[i]), rune(b[i])
@@ -59,81 +75,48 @@ func cmpFunc(cardOrder map[rune]int, a, b string) int {
 	return 0
 }
 
-func part1(lines []string) int {
-	var cardOrder map[rune]int = map[rune]int{
-		'2': 0,
-		'3': 1,
-		'4': 2,
-		'5': 3,
-		'6': 4,
-		'7': 5,
-		'8': 6,
-		'9': 7,
-		'T': 8,
-		'J': 9,
-		'Q': 10,
-		'K': 11,
-		'A': 12,
+func createCounts(hand string) []int {
+	counts := make([]int, 20)
+	for _, c := range hand {
+		counts[cardOrder[c]] += 1
 	}
+	return counts
+}
 
-	res := 0
-	ranks := make(map[int][]string)
-	bids := make(map[string]int)
-	for _, line := range lines {
-		hand := strings.Split(line, " ")
-		n, _ := strconv.Atoi(hand[1])
-		bids[hand[0]] = n
-		counts := make([]int, len(cardOrder))
-		for _, c := range hand[0] {
-			counts[cardOrder[c]] += 1
-		}
-		slices.SortFunc[[]int](counts, func(a, b int) int {
-			return b - a
-		})
-		if counts[0] == 5 {
-			// five of a kind
-			ranks[FIVE] = append(ranks[FIVE], hand[0])
-			slices.SortFunc[[]string](ranks[FIVE], func(a, b string) int {
-				return cmpFunc(cardOrder, a, b)
-			})
-		} else if counts[0] == 4 {
-			// four of a kind
-			ranks[FOUR] = append(ranks[FOUR], hand[0])
-			slices.SortFunc[[]string](ranks[FOUR], func(a, b string) int {
-				return cmpFunc(cardOrder, a, b)
-			})
-		} else if counts[0] == 3 && counts[1] == 2 {
-			// full house
-			ranks[FULL] = append(ranks[FULL], hand[0])
-			slices.SortFunc[[]string](ranks[FULL], func(a, b string) int {
-				return cmpFunc(cardOrder, a, b)
-			})
-		} else if counts[0] == 3 {
-			// three of a kind
-			ranks[THREE] = append(ranks[THREE], hand[0])
-			slices.SortFunc[[]string](ranks[THREE], func(a, b string) int {
-				return cmpFunc(cardOrder, a, b)
-			})
-		} else if counts[0] == 2 && counts[1] == 2 {
-			// two pairs
-			ranks[TWO_PAIR] = append(ranks[TWO_PAIR], hand[0])
-			slices.SortFunc[[]string](ranks[TWO_PAIR], func(a, b string) int {
-				return cmpFunc(cardOrder, a, b)
-			})
-		} else if counts[0] == 2 {
-			// pair
-			ranks[ONE_PAIR] = append(ranks[ONE_PAIR], hand[0])
-			slices.SortFunc[[]string](ranks[ONE_PAIR], func(a, b string) int {
-				return cmpFunc(cardOrder, a, b)
-			})
-		} else if counts[0] == 1 {
-			// high
-			ranks[HIGH] = append(ranks[HIGH], hand[0])
-			slices.SortFunc[[]string](ranks[HIGH], func(a, b string) int {
-				return cmpFunc(cardOrder, a, b)
-			})
-		}
+func updateRanks(ranks *map[int][]string, counts []int, hand string) {
+	if counts[0] == 5 {
+		// five of a kind
+		(*ranks)[FIVE] = append((*ranks)[FIVE], hand)
+		slices.SortFunc[[]string]((*ranks)[FIVE], cmpFunc)
+	} else if counts[0] == 4 {
+		// four of a kind
+		(*ranks)[FOUR] = append((*ranks)[FOUR], hand)
+		slices.SortFunc[[]string]((*ranks)[FOUR], cmpFunc)
+	} else if counts[0] == 3 && counts[1] == 2 {
+		// full house
+		(*ranks)[FULL] = append((*ranks)[FULL], hand)
+		slices.SortFunc[[]string]((*ranks)[FULL], cmpFunc)
+	} else if counts[0] == 3 {
+		// three of a kind
+		(*ranks)[THREE] = append((*ranks)[THREE], hand)
+		slices.SortFunc[[]string]((*ranks)[THREE], cmpFunc)
+	} else if counts[0] == 2 && counts[1] == 2 {
+		// two pairs
+		(*ranks)[TWO_PAIR] = append((*ranks)[TWO_PAIR], hand)
+		slices.SortFunc[[]string]((*ranks)[TWO_PAIR], cmpFunc)
+	} else if counts[0] == 2 {
+		// pair
+		(*ranks)[ONE_PAIR] = append((*ranks)[ONE_PAIR], hand)
+		slices.SortFunc[[]string]((*ranks)[ONE_PAIR], cmpFunc)
+	} else if counts[0] == 1 {
+		// high
+		(*ranks)[HIGH] = append((*ranks)[HIGH], hand)
+		slices.SortFunc[[]string]((*ranks)[HIGH], cmpFunc)
 	}
+}
+
+func calculateResult(ranks map[int][]string, bids map[string]int) int {
+	res := 0
 	r := 1
 	for i := 0; i < 7; i++ {
 		for _, hand := range ranks[i] {
@@ -144,34 +127,31 @@ func part1(lines []string) int {
 	return res
 }
 
-func part2(lines []string) int {
-	var cardOrder map[rune]int = map[rune]int{
-		'J': 0,
-		'2': 1,
-		'3': 2,
-		'4': 3,
-		'5': 4,
-		'6': 5,
-		'7': 6,
-		'8': 7,
-		'9': 8,
-		'T': 9,
-		'Q': 10,
-		'K': 11,
-		'A': 12,
-	}
-
-	res := 0
+func part1(lines []string) int {
 	ranks := make(map[int][]string)
 	bids := make(map[string]int)
 	for _, line := range lines {
 		hand := strings.Split(line, " ")
 		n, _ := strconv.Atoi(hand[1])
 		bids[hand[0]] = n
-		counts := make([]int, len(cardOrder))
-		for _, c := range hand[0] {
-			counts[cardOrder[c]] += 1
-		}
+		counts := createCounts(hand[0])
+		slices.SortFunc[[]int](counts, func(a, b int) int {
+			return b - a
+		})
+		updateRanks(&ranks, counts, hand[0])
+	}
+	return calculateResult(ranks, bids)
+}
+
+func part2(lines []string) int {
+	cardOrder['J'] = 0
+	ranks := make(map[int][]string)
+	bids := make(map[string]int)
+	for _, line := range lines {
+		hand := strings.Split(line, " ")
+		n, _ := strconv.Atoi(hand[1])
+		bids[hand[0]] = n
+		counts := createCounts(hand[0])
 		slices.SortFunc[[]int](counts[1:], func(a, b int) int {
 			return a - b
 		})
@@ -180,56 +160,7 @@ func part2(lines []string) int {
 		slices.SortFunc[[]int](counts, func(a, b int) int {
 			return b - a
 		})
-		if counts[0] == 5 {
-			// five of a kind
-			ranks[FIVE] = append(ranks[FIVE], hand[0])
-			slices.SortFunc[[]string](ranks[FIVE], func(a, b string) int {
-				return cmpFunc(cardOrder, a, b)
-			})
-		} else if counts[0] == 4 {
-			// four of a kind
-			ranks[FOUR] = append(ranks[FOUR], hand[0])
-			slices.SortFunc[[]string](ranks[FOUR], func(a, b string) int {
-				return cmpFunc(cardOrder, a, b)
-			})
-		} else if counts[0] == 3 && counts[1] == 2 {
-			// full house
-			ranks[FULL] = append(ranks[FULL], hand[0])
-			slices.SortFunc[[]string](ranks[FULL], func(a, b string) int {
-				return cmpFunc(cardOrder, a, b)
-			})
-		} else if counts[0] == 3 {
-			// three of a kind
-			ranks[THREE] = append(ranks[THREE], hand[0])
-			slices.SortFunc[[]string](ranks[THREE], func(a, b string) int {
-				return cmpFunc(cardOrder, a, b)
-			})
-		} else if counts[0] == 2 && counts[1] == 2 {
-			// two pairs
-			ranks[TWO_PAIR] = append(ranks[TWO_PAIR], hand[0])
-			slices.SortFunc[[]string](ranks[TWO_PAIR], func(a, b string) int {
-				return cmpFunc(cardOrder, a, b)
-			})
-		} else if counts[0] == 2 {
-			// pair
-			ranks[ONE_PAIR] = append(ranks[ONE_PAIR], hand[0])
-			slices.SortFunc[[]string](ranks[ONE_PAIR], func(a, b string) int {
-				return cmpFunc(cardOrder, a, b)
-			})
-		} else if counts[0] == 1 {
-			// high
-			ranks[HIGH] = append(ranks[HIGH], hand[0])
-			slices.SortFunc[[]string](ranks[HIGH], func(a, b string) int {
-				return cmpFunc(cardOrder, a, b)
-			})
-		}
+		updateRanks(&ranks, counts, hand[0])
 	}
-	r := 1
-	for i := 0; i < 7; i++ {
-		for _, hand := range ranks[i] {
-			res += (r * bids[hand])
-			r += 1
-		}
-	}
-	return res
+	return calculateResult(ranks, bids)
 }
